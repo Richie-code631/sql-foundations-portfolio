@@ -33,3 +33,31 @@ WHERE sales_channel IN ('Online', 'Partner')
   AND order_date < '2026-04-01'
 ORDER BY order_date ASC, order_id ASC;
 
+--Q5. grain: one row per order line (top 15 by gross value before discount)
+SELECT TOP (15)
+    order_id,
+    product_name,
+    quantity,
+    unit_price,
+    ROUND(quantity * unit_price, 2) AS gross_line_value
+FROM dbo.order_items
+ORDER BY gross_line_value DESC, line_id;
+
+-- Q6. grain: one row per order line (trimmed product name starts with S)
+SELECT line_id,
+       product_name,
+       TRIM(UPPER(product_name)) AS product_label
+FROM dbo.order_items
+WHERE TRIM(UPPER(product_name)) LIKE 'S%'
+ORDER BY product_label, line_id;
+
+-- Q7 grain: one row per order line (created in 2026)
+-- YEAR() and MONTH() already return INT in SQL Server, so no CAST is needed
+SELECT order_id,
+       order_date,
+       YEAR(order_date) AS order_year,
+       MONTH(order_date) AS order_month
+FROM dbo.order_items
+WHERE YEAR(order_date) = 2026
+ORDER BY order_date, order_id;
+
